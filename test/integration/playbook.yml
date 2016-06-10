@@ -1,0 +1,7 @@
+---
+
+- name: Terraform - VPC Module Test(s)
+  hosts: all
+  become: yes
+  tasks:
+    - debug:

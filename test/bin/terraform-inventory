@@ -1,0 +1,155 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'optparse'
+require 'ostruct'
+require 'pp'
+
+module Ansible
+  module Inventory
+    class Terraform
+      attr_reader :state, :inventory
+      attr_accessor :state_path
+
+      DEFAULT_TF_STATE_FILE=File.expand_path("./terraform.tfstate")
+
+      def initialize(**kwargs)
+        @state_path = kwargs["state_path"] || "file://#{DEFAULT_TF_STATE_FILE}"
+        @state = grok
+
+        @hostvars = {}
+        @inventory = { "_meta" => { "hostvars" => {} } }
+
+        @state.each do |resource| 
+          group(resource)
+        end
+        @inventory["_meta"]["hostvars"] = @hostvars
+        @inventory
+      end
+
+      def grok
+        case @state_path
+        when /^(\/|file:\/\/)/i
+          state_file = @state_path.gsub('file://','')
+          raise StandardError.new('State file does not exist') unless File.exists? state_file
+
+          state = JSON.parse(File.read(state_file))
+        else
+          raise StandardError.new('Unknown state path')
+        end
+        parse(state)
+      end
+
+      def parse(state)
+        modules = state['modules']
+        resources = []
+
+        modules.each do |mod|
+          mod_resources = mod['resources'].reject { |k,v| v["type"] != "aws_instance" }
+          resources.concat(mod_resources.map { |k,v| v })
+        end
+        return resources
+      end
+
+      def group(resource)
+        dependencies = resource["depends_on"]
+        attributes_container_key =  resource.reject { |k,v| ["depends_on","type"].include? k }.keys.first
+        attributes = resource[attributes_container_key]["attributes"]
+
+        tags = attributes.select { |k,v| k =~ /^tags\.[a-z].+$/i }
+        tags = tags.map { |k,v| [k.gsub('tags.',''), v] }.to_h
+        root_block_devices = attributes.select { |k,v| k =~ /^root_block_device\.[0-9]\./ }
+        root_block_devices = root_block_devices.map { |k,v| [k.gsub('root_block_device.',''), v] }.to_h
+
+        purposes = tags['Purpose'].gsub(/( ?and)/, '').downcase.split(',') if tags.key? 'Purpose'
+
+        name = tags['Name']
+        @hostvars[name] ||= {}
+        @hostvars[name]['tags'] = tags
+        @hostvars[name]['block_devices'] = root_block_devices
+        @hostvars[name]['public_ip'] = attributes['public_ip'] if attributes.key? 'public_ip'
+        @hostvars[name]['public_dns'] = attributes['public_dns'] if attributes.key? 'public_dns'
+        @hostvars[name]['private_ip'] = attributes['private_ip'] if attributes.key? 'private_ip'
+        @hostvars[name]['private_dns'] = attributes['private_dns'] if attributes.key? 'private_dns'
+        @hostvars[name]['monitoring'] = attributes['monitoring']
+        @hostvars[name]['source_dest_check'] = attributes['source_dest_check']
+        @hostvars[name]['key_name'] = attributes['key_name']
+        @hostvars[name]['ami'] = attributes['ami']
+        @hostvars[name]['instance_type'] = attributes['instance_type']
+
+        tags.reject { |k,v| ["Purpose","Name"].include? k }.each do |tag, tag_value|
+          group_name = "tag_"+tag.downcase+"_"+tag_value
+          @inventory[group_name] ||= {}
+          @inventory[group_name]["hosts"] ||= []
+          @inventory[group_name]["hosts"].push(name)
+        end
+        dependencies.each do |dep|
+          group_name = dep.gsub('.', '_')
+          @inventory[group_name] ||= {}
+          @inventory[group_name]["hosts"] ||= []
+          @inventory[group_name]["hosts"].push(name)
+        end if dependencies.is_a? Array
+        purposes.each do |purpose|
+          group_name = purpose.strip.gsub(' ','_')
+          @inventory[group_name] ||= {}
+          @inventory[group_name]["hosts"] ||= []
+          @inventory[group_name]["hosts"].push(name)
+        end if purposes.is_a? Array
+      end
+    end
+
+    def self.optparse(args)
+      options = OpenStruct.new
+      options.profile = ""
+      options.host = ""
+      options.list = false
+
+      opt_parser = OptionParser.new do |opts|
+        opts.banner = "Usage: terraform-inventory [options]"
+        opts.separator ""
+        opts.separator "Specific options:"
+
+        opts.on("-p", "--profile PROFILE", "Specify a profile to use") do |prof|
+          options.profile = prof
+        end
+
+        opts.on("--host HOSTNAME", "Specify a profile to use") do |hostname|
+          options.host = hostname
+        end
+
+        opts.on_tail("-l", "--list", "List all hosts") do
+          options.list = true
+        end
+
+        opts.on_tail("-h", "--help", "Show this message") do
+          puts opts
+          exit
+        end
+
+        opts.on_tail("--version", "Show version") do
+          puts ::Version.join('.')
+          exit
+        end
+      end # end opt_parser
+      opt_parser.parse!(args)
+      options
+    end # end parse()
+  end
+end
+
+begin
+  options = Ansible::Inventory.optparse(ARGV)
+  inventory = Ansible::Inventory::Terraform.new().inventory
+  if options.list
+    puts JSON.dump(inventory)
+    exit
+  end
+
+  unless options.host.empty?
+    puts JSON.dump(inventory["_meta"]["hostvars"][options.host])
+  end
+rescue OptionParser::ParseError => e
+  puts "Failed."
+  exit
+end
+
