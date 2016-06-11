@@ -7,6 +7,7 @@
 
 # resource subnet dmzA
 resource "aws_subnet" "dmzA" {
+    availability_zone = "${var.region}a"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 1)}"
     map_public_ip_on_launch = true
@@ -14,6 +15,7 @@ resource "aws_subnet" "dmzA" {
 
 # resource subnet dmzB
 resource "aws_subnet" "dmzB" {
+    availability_zone = "${var.region}b"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 2)}"
     map_public_ip_on_launch = true
@@ -21,6 +23,7 @@ resource "aws_subnet" "dmzB" {
 
 # resource subnet dmzC
 resource "aws_subnet" "dmzC" {
+    availability_zone = "${var.region}c"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 3)}"
     map_public_ip_on_launch = true
@@ -45,8 +48,7 @@ resource "aws_subnet" "privateA" {
 
 # resource subnet privateB
 resource "aws_subnet" "privateB" {
-
-  availability_zone = "${var.region}b"
+    availability_zone = "${var.region}b"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 5)}"
 }
@@ -54,7 +56,7 @@ resource "aws_subnet" "privateB" {
 # resource subnet privateC
 resource "aws_subnet" "privateC" {
 
-  availability_zone = "${var.region}c"
+    availability_zone = "${var.region}c"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 6)}"
 }
