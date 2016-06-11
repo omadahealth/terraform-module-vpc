@@ -3,6 +3,9 @@
    description: contains resource declarations for the vpc (only)
 **/
 
+# Variable: `region`, required argument
+variable "region" {}
+
 # Variable: `cidr`, required argument
 variable "cidr" {}
 

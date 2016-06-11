@@ -1,3 +1,6 @@
+.DS_Store
+.idea/
+test/.terraform
 *.swp
 *.swo
 *.tfstate

@@ -27,25 +27,44 @@ resource "aws_route_table_association" "dmzCtodmz" {
 }
 
 # resource private route table
-resource "aws_route_table" "private" {
+resource "aws_route_table" "privateA" {
     vpc_id = "${aws_vpc.vpc.id}"
+
+    route {
+        cidr_block = "0.0.0.0/0"
+        nat_gateway_id = "${aws_nat_gateway.nat_gwA.id}"
+    }
 }
 
 resource "aws_route_table_association" "privateAtoprivate" {
     subnet_id = "${aws_subnet.privateA.id}"
-    route_table_id = "${aws_route_table.private.id}"
+    route_table_id = "${aws_route_table.privateA.id}"
 }
 
+# resource private route table
+resource "aws_route_table" "privateB" {
+    vpc_id = "${aws_vpc.vpc.id}"
+
+    route {
+        cidr_block = "0.0.0.0/0"
+        nat_gateway_id = "${aws_nat_gateway.nat_gwB.id}"
+    }
+}
 resource "aws_route_table_association" "privateBtoprivate" {
     subnet_id = "${aws_subnet.privateB.id}"
-    route_table_id = "${aws_route_table.private.id}"
+    route_table_id = "${aws_route_table.privateB.id}"
 }
 
+# resource private route table
+resource "aws_route_table" "privateC" {
+    vpc_id = "${aws_vpc.vpc.id}"
+
+    route {
+        cidr_block = "0.0.0.0/0"
+        nat_gateway_id = "${aws_nat_gateway.nat_gwC.id}"
+    }
+}
 resource "aws_route_table_association" "privateCtoprivate" {
     subnet_id = "${aws_subnet.privateC.id}"
-    route_table_id = "${aws_route_table.private.id}"
-}
-
-output "private_route_table_id" {
-    value = "${aws_route_table.private.id}"
+    route_table_id = "${aws_route_table.privateC.id}"
 }

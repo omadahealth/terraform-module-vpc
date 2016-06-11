@@ -38,18 +38,23 @@ output "dmz_subnet_cidrs" {
 
 # resource subnet privateA
 resource "aws_subnet" "privateA" {
+    availability_zone = "${var.region}a"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 4)}"
 }
 
 # resource subnet privateB
 resource "aws_subnet" "privateB" {
+
+  availability_zone = "${var.region}b"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 5)}"
 }
 
 # resource subnet privateC
 resource "aws_subnet" "privateC" {
+
+  availability_zone = "${var.region}c"
     vpc_id = "${aws_vpc.vpc.id}"
     cidr_block = "${cidrsubnet(var.cidr, 5, 6)}"
 }
