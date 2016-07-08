@@ -1,7 +1,7 @@
-/**
-  file: networking-route_table.tf
-  description: contains resource declarations for VPC route tables
-**/
+#
+#  file: networking-route_table.tf
+#  description: contains resource declarations for VPC route tables
+#
 
 # resource dmz route table
 resource "aws_route_table" "dmz" {
@@ -10,6 +10,11 @@ resource "aws_route_table" "dmz" {
     route {
         cidr_block = "0.0.0.0/0"
         gateway_id = "${aws_internet_gateway.default.id}"
+    }
+
+    tags {
+        Name = "dmz"
+        Environment = "${var.environment}"
     }
 }
 
@@ -34,6 +39,11 @@ resource "aws_route_table" "privateA" {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = "${aws_nat_gateway.nat_gwA.id}"
     }
+
+    tags {
+        Name = "privateA"
+        Environment = "${var.environment}"
+    }
 }
 
 resource "aws_route_table_association" "privateAtoprivate" {
@@ -49,6 +59,11 @@ resource "aws_route_table" "privateB" {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = "${aws_nat_gateway.nat_gwB.id}"
     }
+
+    tags {
+        Name = "privateB"
+        Environment = "${var.environment}"
+    }
 }
 resource "aws_route_table_association" "privateBtoprivate" {
     subnet_id = "${aws_subnet.privateB.id}"
@@ -62,6 +77,11 @@ resource "aws_route_table" "privateC" {
     route {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = "${aws_nat_gateway.nat_gwC.id}"
+    }
+
+    tags {
+        Name = "privateC"
+        Environment = "${var.environment}"
     }
 }
 resource "aws_route_table_association" "privateCtoprivate" {

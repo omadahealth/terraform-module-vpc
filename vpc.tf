@@ -1,7 +1,7 @@
-/**
-   file: vpc.tf
-   description: contains resource declarations for the vpc (only)
-**/
+#
+#   file: vpc.tf
+#   description: contains resource declarations for the vpc (only)
+#
 
 # Variable: `region`, required argument
 variable "region" {}
