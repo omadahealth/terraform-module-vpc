@@ -15,12 +15,17 @@ variable "name" {}
 # Variable: `environment`, required argument
 variable "environment" {}
 
+# Variable: `tenancy`, defaults to 'dedicated', used to specify instance tenancy requirement
+variable "tenancy" {
+    default = "dedicated"
+}
+
 # resource aws_vpc
 resource "aws_vpc" "vpc" {
     cidr_block = "${var.cidr}"
     enable_dns_support = true
     enable_dns_hostnames = true
-    instance_tenancy = "dedicated"
+    instance_tenancy = "${var.tenancy}"
 
     tags {
         Name = "${var.name}"
