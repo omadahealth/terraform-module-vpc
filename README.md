@@ -27,15 +27,17 @@ module "test-vpc" {
 
 #### Outputs
 
-| Output Name              | Type   | Serialized                     | Purpose                                     |
-| ------------------------ | ------ | ------------------------------ | ------------------------------------------- |
-| `dmz_subnet_ids`         | String | Yes, comma delineated elements | A serialized array of DMZ subnet IDs        |
-| `private_subnet_ids`     | String | Yes, comma delineated elements | A serialized array of Private subnet IDs    |
-| `dmz_subnet_cidrs`       | String | Yes, comma delineated elements | A serialized array of DMZ subnet CIDRs      |
-| `private_subnet_cidrs`   | String | Yes, comma delineated elements | A serialized array of Private subnet CIDRs  |
-| `availability_zones`     | String | Yes, comma delineated elements | A serialized array of availability zone IDs |
-| `default_sg`             | String | No                             | Default security group ID for VPC           |
-| `vpc_id`                 | String | No                             | ID of VPC resource                          |
+| Output Name              | Type   | Serialized                     | Purpose                                       |
+| ------------------------ | ------ | ------------------------------ | --------------------------------------------- |
+| `dmz_subnet_ids`         | String | Yes, comma delineated elements | A serialized array of DMZ subnet IDs          |
+| `private_subnet_ids`     | String | Yes, comma delineated elements | A serialized array of Private subnet IDs      |
+| `dmz_subnet_cidrs`       | String | Yes, comma delineated elements | A serialized array of DMZ subnet CIDRs        |
+| `private_subnet_cidrs`   | String | Yes, comma delineated elements | A serialized array of Private subnet CIDRs    |
+| `availability_zones`     | String | Yes, comma delineated elements | A serialized array of availability zone IDs   |
+| `default_sg`             | String | No                             | Default security group ID for VPC             |
+| `vpc_id`                 | String | No                             | ID of VPC resource                            |
+| `private_route_tables`   | String | Yes, comma delineated elements | A serialized array of Private Route table IDs |
+| `dmz_route_table`        | String | No                             | ID of DMZ route table                         |
 
 
 ### Testing
